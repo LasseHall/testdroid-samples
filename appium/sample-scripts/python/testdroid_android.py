@@ -4,7 +4,6 @@
 ##
 
 import os
-import time
 import unittest
 import subprocess
 from time import sleep
@@ -15,7 +14,6 @@ from testdroid_utils import TDUtils
 
 
 class TestdroidAndroid(unittest.TestCase):
-
     def setUp(self):
 
         ##
@@ -63,10 +61,10 @@ class TestdroidAndroid(unittest.TestCase):
         desired_capabilities_cloud = {}
         desired_capabilities_cloud['testdroid_apiKey'] = testdroid_apiKey
         desired_capabilities_cloud['testdroid_target'] = 'android'
-        desired_capabilities_cloud['automationName'] = 'android'
+        desired_capabilities_cloud['automationName'] = 'Appium'
         if self.api_level <= 16:
             desired_capabilities_cloud['testdroid_target'] = 'selendroid'
-            desired_capabilities_cloud['automationName'] = 'selendroid'
+            desired_capabilities_cloud['automationName'] = 'Selendroid'
 
         desired_capabilities_cloud['testdroid_project'] = testdroid_project_name
         desired_capabilities_cloud['testdroid_testrun'] = testdroid_testrun_name
@@ -86,7 +84,6 @@ class TestdroidAndroid(unittest.TestCase):
         self.utils.log("WebDriver response received")
         self.utils.update_driver(self.driver)
 
-
     def tearDown(self):
         self.utils.log("Quitting")
         self.driver.quit()
@@ -102,7 +99,7 @@ class TestdroidAndroid(unittest.TestCase):
         self.utils.screenshot("app_launch")
 
         self.utils.log("  Typing in name")
-        elems=self.driver.find_elements_by_class_name('android.widget.EditText')
+        elems = self.driver.find_elements_by_class_name('android.widget.EditText')
         self.utils.log("  info: EditText:" + `len(elems)`)
         self.utils.log("  Filling in name")
         elems[0].send_keys("Testdroid User")
@@ -118,14 +115,14 @@ class TestdroidAndroid(unittest.TestCase):
             self.utils.log("  Hiding keyboard")
             self.driver.hide_keyboard()
         except WebDriverException:
-            pass # pass exception, if keyboard isn't visible already
+            pass  # pass exception, if keyboard isn't visible already
         self.utils.screenshot("name_typed_keyboard_hidden")
 
         self.utils.log("  Clicking element 'Buy 101 devices'")
         if isSelendroid:
             elem = self.driver.find_element_by_link_text('Buy 101 devices')
         else:
-            elem = self.driver.find_element_by_name('Buy 101 devices')
+            elem = self.driver.find_element_by_android_uiautomator('new UiSelector().text("Buy 101 devices")')
         elem.click()
 
         self.utils.screenshot("clicked_button1")
@@ -134,7 +131,7 @@ class TestdroidAndroid(unittest.TestCase):
         if isSelendroid:
             elem = self.driver.find_element_by_link_text('Answer')
         else:
-            elem = self.driver.find_element_by_name('Answer')
+            elem = self.driver.find_element_by_android_uiautomator('new UiSelector().text("Answer")')
         elem.click()
 
         self.utils.screenshot("answer")
@@ -147,7 +144,7 @@ class TestdroidAndroid(unittest.TestCase):
         if isSelendroid:
             elem = self.driver.find_element_by_link_text('Use Testdroid Cloud')
         else:
-            elem = self.driver.find_element_by_name('Use Testdroid Cloud')
+            elem = self.driver.find_element_by_android_uiautomator('new UiSelector().text("Use Testdroid Cloud")')
         elem.click()
 
         self.utils.screenshot("clicked_button2")
@@ -156,13 +153,15 @@ class TestdroidAndroid(unittest.TestCase):
         if isSelendroid:
             elem = self.driver.find_element_by_link_text('Answer')
         else:
-            elem = self.driver.find_element_by_name('Answer')
+            elem = self.driver.find_element_by_android_uiautomator('new UiSelector().text("Answer")')
         elem.click()
 
         self.utils.screenshot("answer")
 
+
 def initialize():
     return TestdroidAndroid
+
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestdroidAndroid)
