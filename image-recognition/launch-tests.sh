@@ -158,7 +158,7 @@ ZIP_EXISTS="$(curl -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}
 if [[ ( -z ${UPLOAD} ) && ( ${ZIP_EXISTS} -ne "null" ) ]]; then
     :
 else
-    # Set the name of zip and copy correct sh template
+    # Create the test zip
     if [[ ( "${ANDROID}" = true ) ]] ; then
         OUT_ZIP=$(./createAndroidZip.sh)
     elif [[ ( "${IOS}" = true ) ]] ; then
@@ -197,12 +197,12 @@ TESTRUN_ID="$(echo "${TESTRUN_LAUNCH}" | grep -Po '"id".*?,' | sed -ne 's/^.*:\(
 if [ -z ${TESTRUN_ID} ] ; then
     echo "TESTRUN_ID not given, the test probably wasn't launched properly.. launch command reply was:"
     echo "${TESTRUN_LAUNCH}"
-    echo "exiting."
+    echo "Exiting."
     exit
 else
     echo "Testrun ID: ${TESTRUN_ID}"
     TEST_STATE="WAITING"
-    while [ ${TEST_STATE} != "\"FINISHED\"" ] ; do
+    while [ ${TEST_STATE} != "FINISHED" ] ; do
         TEST_STATE="$(curl -s -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/projects/${PROJECT_ID}/runs/${TESTRUN_ID}" | grep -Po '"state".*?,' | sed -ne 's/^.*:"\(.*\)"*",/\1/p')"
         echo "TEST_STATE = ${TEST_STATE}"
         sleep 10
