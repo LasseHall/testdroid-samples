@@ -9,5 +9,5 @@ cp run-tests_android.sh run-tests.sh
 if [ -f "${OUT_ZIP}" ]; then
     rm "${OUT_ZIP}"
 fi
-zip -rq "${OUT_ZIP}" pom.xml run-tests.sh src lib/linux queryimages
+git archive -o "${OUT_ZIP}" --format=zip HEAD pom.xml run-tests.sh src lib/linux queryimages
 echo "${OUT_ZIP}"
