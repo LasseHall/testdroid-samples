@@ -67,7 +67,7 @@ if [ -z ${API_KEY} ] ; then
     echo "API_KEY with -k not given!" >&2
     help
 else
-    MAIN_USER_ID="$(curl -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me" | grep -Po '"mainUserId".*?,' | sed -ne 's/^.*:\(.*\)"*,/\1/p')"
+    MAIN_USER_ID="$(curl -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me" | perl -nle 'print $1 if m{"mainUserId":(.*?,)}' | sed -e 's/\"//g' -e 's/,//g')"
     echo "MAIN_USER_ID: ${MAIN_USER_ID}"
     if [ -z ${MAIN_USER_ID} ] ; then
         echo "Authentication failed, check apikey given in -k: "${API_KEY}""
@@ -83,22 +83,22 @@ if [ -z ${PROJECT_NAME} ] ; then
     echo "No -p <PROJECT_NAME> given, creating a new project"
     if [ ${ANDROID} ] ; then
         echo "Creating Android project.."
-        PROJECT_NAME="$(curl -H "Accept: application/json" -u ${API_KEY}: -X POST -F 'type=APPIUM_ANDROID_SERVER_SIDE' "${API_ENDPOINT}/api/v2/me/projects" | grep -Po '"name".*?,' | sed -ne 's/^.*:"\(.*\)"*",/\1/p')"
+        PROJECT_NAME="$(curl -H "Accept: application/json" -u ${API_KEY}: -X POST -F 'type=APPIUM_ANDROID_SERVER_SIDE' "${API_ENDPOINT}/api/v2/me/projects" | perl -nle 'print $1 if m{"name":(.*?,)}' | sed -e 's/\"//g' -e 's/,//g')"
     elif [ ${IOS} ] ; then
         echo "Creating iOS project.."
-        PROJECT_NAME="$(curl -H "Accept: application/json" -u ${API_KEY}: -X POST -F 'type=APPIUM_IOS_SERVER_SIDE' "${API_ENDPOINT}/api/v2/me/projects" | grep -Po '"name".*?,' | sed -ne 's/^.*:"\(.*\)"*",/\1/p')"
+        PROJECT_NAME="$(curl -H "Accept: application/json" -u ${API_KEY}: -X POST -F 'type=APPIUM_IOS_SERVER_SIDE' "${API_ENDPOINT}/api/v2/me/projects" | perl -nle 'print $1 if m{"name":(.*?,)}' | sed -e 's/\"//g' -e 's/,//g')"
     else
         echo "$ANDROID and $IOS were both false.. exiting" >&2
         exit 1
     fi
     echo "Created project with name: ${PROJECT_NAME}"
-    PROJECT_ID="$(curl -G -s -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/projects?limit=1" --data-urlencode "search=${PROJECT_NAME}" | grep -Po '"id".*?,' | sed -ne 's/^.*:\(.*\)"*,/\1/p')"
+    PROJECT_ID="$(curl -G -s -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/projects?limit=1" --data-urlencode "search=${PROJECT_NAME}" | perl -nle 'print $1 if m{"id":(.*?,)}' | sed -e 's/\"//g' -e 's/,//g')"
     echo "PROJECT_ID: ${PROJECT_ID}"
 else
     echo "Checking if project with name ${PROJECT_NAME} exists"
 
     # Check if Project exists
-    PROJECT_ID="$(curl -G -s -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/projects?limit=1" --data-urlencode "search=${PROJECT_NAME}" | grep -Po '"id".*?,' | sed -ne 's/^.*:\(.*\)"*,/\1/p')"
+    PROJECT_ID="$(curl -G -s -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/projects?limit=1" --data-urlencode "search=${PROJECT_NAME}" | perl -nle 'print $1 if m{"id":(.*?,)}' | sed -e 's/\"//g' -e 's/,//g')"
     if [ -z ${PROJECT_ID} ] ; then
         echo "Project not found, creating it now with name ${PROJECT_NAME}"
         if [ ${ANDROID} ] ; then
@@ -112,7 +112,7 @@ else
             exit 1
         fi
         echo
-        PROJECT_ID="$(curl -G -s -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/projects?limit=1" --data-urlencode "search=${PROJECT_NAME}" | grep -Po '"id".*?,' | sed -ne 's/^.*:\(.*\)"*,/\1/p')"
+        PROJECT_ID="$(curl -G -s -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/projects?limit=1" --data-urlencode "search=${PROJECT_NAME}" | perl -nle 'print $1 if m{"id":(.*?,)}' | sed -e 's/\"//g' -e 's/,//g')"
         echo "Project created with ID: ${PROJECT_ID} and name: ${PROJECT_NAME}"
     else
         echo "Project found with ID: ${PROJECT_ID}"
@@ -120,9 +120,9 @@ else
 fi
 
 # Check that the used project is of correct type with -a/i flag
-PROJECT_TYPE="$(curl -s -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/projects/${PROJECT_ID}" | grep -Po '"type".*?,' | sed -ne 's/^.*:"\(.*\)"*",/\1/p')"
+PROJECT_TYPE="$(curl -s -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/projects/${PROJECT_ID}" | perl -nle 'print $1 if m{"type":(.*?,)}' | sed -e 's/\"//g' -e 's/,//g')"
 echo "PROJECT_TYPE: ${PROJECT_TYPE}"
-PROJECT_FRAMEWORK="$(curl -s -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/projects/${PROJECT_ID}" | grep -Po '"frameworkId".*?,' | sed -ne 's/^.*:\(.*\)"*,/\1/p')"
+PROJECT_FRAMEWORK="$(curl -s -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/projects/${PROJECT_ID}" | perl -nle 'print $1 if m{"frameworkId":(.*?,)}' | sed -e 's/\"//g' -e 's/,//g')"
 echo "PROJECT_FRAMEWORK: ${PROJECT_FRAMEWORK}"
 if [[ ( "${ANDROID}" = true && "${PROJECT_TYPE}" -eq "CALABASH" && "${PROJECT_FRAMEWORK}" -eq 541 ) \
    || ( "${IOS}" = true && "${PROJECT_TYPE}" -eq "CALABASH_IOS" && "${PROJECT_FRAMEWORK}" -eq 542 ) \
@@ -136,7 +136,7 @@ fi
 
 # Check that Device Group exists
 echo "DEVICE_GROUP_NAME: ${DEVICE_GROUP_NAME}"
-DEVICE_GROUP_ID="$(curl -G -s -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/device-groups?withPublic=true" --data-urlencode "limit=1" --data-urlencode "search=${DEVICE_GROUP_NAME}" | grep -Po '"id".*?,' | sed -ne 's/^.*:\(.*\)"*,/\1/p')"
+DEVICE_GROUP_ID="$(curl -G -s -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/device-groups?withPublic=true" --data-urlencode "limit=1" --data-urlencode "search=${DEVICE_GROUP_NAME}" | perl -nle 'print $1 if m{"id":(.*?,)}' | sed -e 's/\"//g' -e 's/,//g')"
 echo "DEVICE_GROUP_ID: ${DEVICE_GROUP_ID}"
 if [ -z ${DEVICE_GROUP_ID} ]; then
     echo "No DEVICE_GROUP_ID found; Device group with name \"${DEVICE_GROUP_NAME}\" doesn't seem to exist."
@@ -144,7 +144,7 @@ if [ -z ${DEVICE_GROUP_ID} ]; then
 fi
 
 # Check that Device Group is of correct type
-DEVICE_GROUP_TYPE="$(curl -s -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/device-groups/${DEVICE_GROUP_ID}" | grep -Po '"osType".*?,' | sed -ne 's/^.*:"\(.*\)"*",/\1/p')"
+DEVICE_GROUP_TYPE="$(curl -s -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/device-groups/${DEVICE_GROUP_ID}" | perl -nle 'print $1 if m{"osType":(.*?,)}' | sed -e 's/\"//g' -e 's/,//g')"
 echo "DEVICE_GROUP_TYPE: ${DEVICE_GROUP_TYPE}"
 if [[ ( "${ANDROID}" = true && "${DEVICE_GROUP_TYPE}" -eq "ANDROID" ) || ( "${IOS}" = true && "${DEVICE_GROUP_TYPE}" -eq "IOS" ) ]] ; then
     :
@@ -154,7 +154,7 @@ else
 fi
 
 # Create and upload zip file if -t was given or if project has no zip uploaded yet
-ZIP_EXISTS="$(curl -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/projects/${PROJECT_ID}/files" | grep -Po '"test".*?,' | sed -ne 's/^.*:"\(.*\)"*",/\1/p')"
+ZIP_EXISTS="$(curl -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/projects/${PROJECT_ID}/files" | perl -nle 'print $1 if m{"test":(.*?,)}' | sed -e 's/\"//g' -e 's/,//g')"
 if [[ ( -z ${UPLOAD} ) && ( ${ZIP_EXISTS} -ne "null" ) ]]; then
     :
 else
@@ -174,7 +174,7 @@ else
     echo
 fi
 
-APP_EXISTS="$(curl -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/projects/${PROJECT_ID}/files" | grep -Po '"app".*?,' | sed -ne 's/^.*:"\(.*\)"*",/\1/p')"
+APP_EXISTS="$(curl -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/projects/${PROJECT_ID}/files" | perl -nle 'print $1 if m{"app":(.*?,)}' | sed -e 's/\"//g' -e 's/,//g')"
 # Upload APP_FILE if -f was given or if project has no app uploaded yet
 if [[ ( -z ${APP_FILE} ) && ( ${APP_EXISTS} -ne "null" ) ]]; then
     :
@@ -192,7 +192,7 @@ fi
 echo
 echo "Launching test in Testdroid!"
 TESTRUN_LAUNCH="$(curl -s -H "Accept: application/json" -u ${API_KEY}: -X POST "${API_ENDPOINT}/api/v2/me/projects/${PROJECT_ID}/runs?usedDeviceGroupId=${DEVICE_GROUP_ID}")"
-TESTRUN_ID="$(echo "${TESTRUN_LAUNCH}" | grep -Po '"id".*?,' | sed -ne 's/^.*:\(.*\)"*,/\1/p')"
+TESTRUN_ID="$(echo "${TESTRUN_LAUNCH}" | perl -nle 'print $1 if m{"id":(.*?,)}' | sed -e 's/\"//g' -e 's/,//g')"
 
 if [ -z ${TESTRUN_ID} ] ; then
     echo "TESTRUN_ID not given, the test probably wasn't launched properly.. launch command reply was:"
@@ -203,7 +203,7 @@ else
     echo "Testrun ID: ${TESTRUN_ID}"
     TEST_STATE="WAITING"
     while [ ${TEST_STATE} != "FINISHED" ] ; do
-        TEST_STATE="$(curl -s -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/projects/${PROJECT_ID}/runs/${TESTRUN_ID}" | grep -Po '"state".*?,' | sed -ne 's/^.*:"\(.*\)"*",/\1/p')"
+        TEST_STATE="$(curl -s -H "Accept: application/json" -u ${API_KEY}: "${API_ENDPOINT}/api/v2/me/projects/${PROJECT_ID}/runs/${TESTRUN_ID}" | perl -nle 'print $1 if m{"state":(.*?,)}' | sed -e 's/\"//g' -e 's/,//g')"
         echo "TEST_STATE = ${TEST_STATE}"
         sleep 10
     done
