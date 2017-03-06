@@ -45,7 +45,7 @@ All image recognition related methods are implemented in the TestdroidImageRecog
 
    The A-KAZE C++ implementation can optionally be found and built from: [Bitbar Akaze fork](https://github.com/bitbar/akaze). This project already contains the *./lib/\<platform\>/akaze/* folder with pre-built binaries for Linux, OS X and Windows. Only the akaze_match binary is currently in use.
 
-   
+
 All other dependencies are fetched by Maven automatically.
 
 
@@ -66,7 +66,7 @@ For example, to run only the test `mainPageTest` from test class AndroidSample.j
 To first clean all the previous test result files, add keyword `clean` to the command:
 
     mvn -Dtest=AndroidSample#mainPageTest clean test
-    
+
 You can also use an IDE to launch the tests. Make sure the project is correctly imported as a Maven project and that the `pom.xml` file has been discovered for Maven's dependency management.
 
 **Reports**
@@ -94,3 +94,21 @@ If you change the name of your Android or iOS test class, you will need to updat
     # OPTIONAL: add the name of TestCases to be used with the `mvn test` command
     # Leave blank to test the whole class!
     TEST_CASE="#mainPageTest"
+
+## Use the launch-tests.sh script to launch tests in cloud
+
+This bash script uses the Bitbar Testing REST API to launch the tests in the cloud.
+
+    ./launch-tests.sh - create and upload the test zip to Bitbar Testing and run it
+
+    Usage: ./launch-tests.sh -a/i -g <DEVICE_GROUP_NAME> -k <API_KEY>
+     -a for Android test
+     -i for iOS test
+    Optional: -p <PROJECT_NAME> to choose a specific profile. If not given, a new project will be created
+    Optional: -t for creating and uploading a new test zip file
+    Optional: -f <APP_FILE_PATH> for uploading a new app file
+    Optional: -e <API_ENDPOINT> for private cloud instances
+
+ You can launch this script also on Windows via Git BASH, but you'll first need to make sure that the following git config has been set correctly:
+
+    git config --global core.autocrlf input
