@@ -6,7 +6,7 @@
 OUT_ZIP="android-test.zip"
 
 cp run-tests_android.sh run-tests.sh
-rm -f "${OUT_ZIP}"
+rm -f ${OUT_ZIP}
 
 STASH=$(git stash create)
 git archive -o "${OUT_ZIP}" --format=zip $STASH pom.xml run-tests.sh src lib/linux queryimages
